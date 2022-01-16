@@ -1,18 +1,29 @@
 const productSchema = require('../models/productmodel')
-const Errorhandler = require('../utils/errorHandler')
+const CatchAsyncError = require("../middleware/catchAsyncError")
+
 
 exports.createProduct = async(req,res,next)=>{
     const product= await productSchema.create(req.body)
-    res.status(201).json({
-        success:true,
-        product
-    })
+    try {
+        res.status(201).json({
+            success:true,
+            product
+        })
+    } catch (error) {
+        res.status(501).send({
+            status:false,
+            error
+        })
+    }
 }
 
 exports.getProductById= async (req,res,next) =>{
     let product = await productSchema.findById(req.params.id)
     if(!product){
-        return next(new Errorhandler("product not found",404))
+        res.status(500).send({
+            success:false,
+            message:"product not Found"
+        })
 }
     res.status(200).send({
         success:true,
